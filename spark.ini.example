@@ -1,0 +1,19 @@
+# this is a sample config file used by the api_test.py and spark_test.py
+# the file holds client and user credentials.
+# To use the config:
+#  - rename the file to spark_test.ini
+#  - edit the client credentials (obtain client id and secret at developer.cisco.com.
+#                                 pls don't use 'my' client ID for more than testing
+#				  redirect_uri doesn't need to be a 'real' existing
+#                                 URI. The code intercepts the redirect to that URI
+#  - edit user credentials
+# make sure to set the file to r/o and access to user only to avoid credentials being leaked
+[client]
+id=<client ID from developer.cisco.com>
+secret=<client secret from developer.cisco.com>
+redirect_uri=<redirect URI from developer.cisco.com>
+
+[user]
+id=jkrohn <change me>
+password=<CEC password or CIS password if a non Cisco SSO enabled user is used>
+email=jkrohn@cisco.com <change me>

@@ -1,0 +1,4 @@
+spark_test.ini
+__pycache__/
+*.log
+/spark.ini
