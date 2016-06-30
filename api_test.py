@@ -8,6 +8,7 @@ Tests for simple Spark APIs
 import logging
 import configparser
 import json
+import os
 
 from dump_utilities import set_mask_password, dump_response
 from identity_broker import SparkDevIdentityBroker, OAuthToken
@@ -18,9 +19,9 @@ def test():
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                         #datefmt='%m-%d %H:%M',
-                        filename='./api_test.log',
+                        filename=os.path.splitext(__file__)[0] + '.log',
                         filemode='w')
-    # define a Handler which writes INFO messages or higher to the sys.stderr
+    # define a Handler which writes messages or higher to the sys.stderr
     console = logging.StreamHandler()
     console.setLevel(logging.DEBUG)
     # set a format which is simpler for console use
