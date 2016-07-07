@@ -355,7 +355,7 @@ class SparkDevIdentityBroker(CiscoIdentityBroker):
     def endpoint(self, ep):
         return 'https://' + self.host + '/v1/' + ep
     
-    def auth_code_grant_flow(self, user_info, client_info, scope = 'spark:people_read spark:rooms_read spark:memberships_read spark:messages_read spark:people_write spark:rooms_write spark:memberships_write spark:messages_write'):
+    def auth_code_grant_flow(self, user_info, client_info, scope = 'spark:people_read spark:rooms_read spark:memberships_read spark:messages_read spark:people_write spark:rooms_write spark:memberships_write spark:messages_write spark:teams_read spark:teams_write spark:team_memberships_read spark:team_memberships_write'):
         ''' scope is a space separated list of requested scopes:
             spark:people_read          Read your company directory
             spark:rooms_read           List the titles of rooms that you're in
@@ -402,7 +402,7 @@ class AuthToken(Struct):
         
 class OAuthToken(AuthToken):
     
-    def __init__(self, ib, user_info, client_info, **kwargs):
+    def __init__(self, ib, user_info, client_info, cache_token = True, **kwargs):
         ''' can take an optional scope argument which is passed to the brokers auth_code_grant_flow.
         If scope is not given then the default of the broker is used
         scope is a space separated list of requested scopes:
@@ -417,28 +417,32 @@ class OAuthToken(AuthToken):
         self._ib = ib
         self._user_info = user_info
         self._client_info = client_info
+        self.cache_token = cache_token
         
-        '''
-        check if a cached refresh token exists
-        These are saved as <userid>-token.json.
-        '''
-        cache_file = '{}-refresh.json'.format(user_info['id'])
         refresh_token = None
-        try:
-            f = open(cache_file, 'r')
-        except IOError:
-            pass
-        else:
-            log.info('Reading cached refresh token from file {}'.format(cache_file))
-            refresh_token = Struct(json.load(f))
-            f.close()
-            refresh_token.expires_at = datetime.strptime(refresh_token.expires_at, '%Y-%m-%d %H:%M:%S')
-            refresh_token = AuthToken(token = refresh_token.token, 
-                                      expires_in = refresh_token.expires_in, 
-                                      token_type = refresh_token.token_type, 
-                                      expires_at = refresh_token.expires_at)
-            log.info('Refresh token lifetime is {} seconds, expires at {}, lifetime remaining: {:.0%}'.
-                     format(refresh_token.expires_in, refresh_token.expires_at, refresh_token.ratio_remaining()))
+        if cache_token:
+            '''
+            check if a cached refresh token exists
+            These are saved as <userid>-token.json.
+            '''
+            cache_file = '{}-refresh.json'.format(user_info['id'])
+            try:
+                f = open(cache_file, 'r')
+            except IOError:
+                pass
+            else:
+                log.info('Reading cached refresh token from file {}'.format(cache_file))
+                refresh_token = Struct(json.load(f))
+                f.close()
+                refresh_token.expires_at = datetime.strptime(refresh_token.expires_at, '%Y-%m-%d %H:%M:%S')
+                refresh_token = AuthToken(token = refresh_token.token, 
+                                          expires_in = refresh_token.expires_in, 
+                                          token_type = refresh_token.token_type, 
+                                          expires_at = refresh_token.expires_at)
+                log.info('Refresh token lifetime is {} seconds, expires at {}, lifetime remaining: {:.0%}'.
+                         format(refresh_token.expires_in, refresh_token.expires_at, refresh_token.ratio_remaining()))
+        # if cache_token:
+        
         # this is the handler to get a new refresh token
         self.get_new_refresh_token = lambda: self.code_grant_flow(**kwargs)
         
@@ -466,15 +470,16 @@ class OAuthToken(AuthToken):
                                  token_type = 'Refresh')
         log.debug('Auth code grant flow for user {}. Refresh token valid for {} seconds until {}'.format(self._user_info['id'], self._refresh.expires_in, self._refresh.expires_at))
         
-        # make sure that the refresh token is cached
-        refresh_token = self._refresh.get_dict()
-        refresh_token['expires_at'] = refresh_token['expires_at'].strftime('%Y-%m-%d %H:%M:%S')
-        cache_file = '{}-refresh.json'.format(self._user_info['id'])
-
-        log.info('Caching refresh token in file {}'.format(cache_file))
-        f = open(cache_file, 'w')
-        json.dump(refresh_token, f)
-        f.close()
+        if self.cache_token:
+            # make sure that the refresh token is cached
+            refresh_token = self._refresh.get_dict()
+            refresh_token['expires_at'] = refresh_token['expires_at'].strftime('%Y-%m-%d %H:%M:%S')
+            cache_file = '{}-refresh.json'.format(self._user_info['id'])
+        
+            log.info('Caching refresh token in file {}'.format(cache_file))
+            f = open(cache_file, 'w')
+            json.dump(refresh_token, f)
+            f.close()
             
     def get_access_token(self):
         return self._access

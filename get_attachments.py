@@ -116,7 +116,8 @@ def get_attachments():
             room_state['folder'] =  room_folder
         else:
             # has the folder name been changed?
-            if room_folder != room_state['folder']:
+            # we only look at the leftmost characters since for disambiguation we sometime append digits
+            if room_folder != room_state['folder'][:len(room_folder)]:
                 logging.debug('Room name (folder) for room %s changed from %s to %s' % (room_id, room_state['folder'], room_folder))
                 old_full_path = os.path.join(base_path, room_state['folder'])
                 logging.debug('Renaming %s to %s' % (old_full_path, full_path))
@@ -129,6 +130,8 @@ def get_attachments():
                     else:
                         logging.warning('New folder also does not exist. Potentially lost state!?')
                 room_state['folder'] = room_folder
+            else:
+                room_folder = room_state['folder']
             # if room_folder != ...
             
             if not os.path.lexists(full_path):

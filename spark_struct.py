@@ -19,10 +19,10 @@ class Struct:
             self.__dict__[k] = self._to_struct(v)
             
     def get_dict(self):
-        return {k:v for k,v in self.__dict__.items()}
+        return {k:v.get_dict() if isinstance(v, Struct) else v for k,v in self.__dict__.items()}
     
     def __str__(self):
-        return str(self.__dict__)
+        return str(self.get_dict())
     
     def __contains__(self, key):
         return key in self.__dict__
