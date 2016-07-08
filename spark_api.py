@@ -187,12 +187,16 @@ class TrivialToken:
     
 class SparkAPI:
     def __init__(self, token):
+        ''' 
+        parameters:
+            token:  OAuth token. Can be a string or an object. If an object is passed then the object has to have
+                    a bearer_auth method returning a Bearer authentication header for the token
+        '''
         if isinstance(token, str):
             self.token = TrivialToken(token)
         else:
             self.token = token
         self.session = requests.Session()
-        self.user_cache = {}
         
     def bearer_auth(self):
         return self.token.bearer_auth()
@@ -203,6 +207,13 @@ class SparkAPI:
         kwargs['headers'] = headers
         return kwargs['headers']
     
+    def endpoint(self, api = None, para = None):
+        ep = 'https://api.ciscospark.com/v1'
+        if api: ep += '/' + api
+        if para: ep += '/' + para
+        return ep
+    
+    ############################ basic HTTP methods
     @_method
     def get(self, endpoint, **kwargs):
         return self.session.get(endpoint, **kwargs)
@@ -223,15 +234,6 @@ class SparkAPI:
     def delete(self, endpoint, **kwargs):
         return self.session.delete(endpoint, **kwargs)
         
-    def endpoint(self, api = None, para = None):
-        ep = 'https://api.ciscospark.com/v1'
-        if api: ep += '/' + api
-        if para: ep += '/' + para
-        return ep
-    
-    #def rest_para(self, api, para=None):
-    #    return '/' + api + (('/' + para) if para else '')
-    
     ############################# people
     @_pagination_iterator
     @dumpArgs
@@ -463,5 +465,3 @@ class SparkAPI:
     def delete_webhook(self, webhook_id):
         endpoint = self.endpoint('webhooks', webhook_id)
         return self.delete(endpoint)
-    
-
