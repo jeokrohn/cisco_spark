@@ -54,7 +54,7 @@ def setup_logging():
     # set some logging levels
     logging.getLogger('requests').setLevel(logging.WARNING)
     logging.getLogger('dump_utilities').setLevel(logging.DEBUG)
-    logging.getLogger('identity_broker').setLevel(logging.INFO)
+    logging.getLogger('identity_broker').setLevel(logging.DEBUG)
     logging.getLogger('spark_api').setLevel(logging.DEBUG)
     
 
