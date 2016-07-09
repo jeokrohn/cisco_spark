@@ -355,16 +355,20 @@ class SparkDevIdentityBroker(CiscoIdentityBroker):
     def endpoint(self, ep):
         return 'https://' + self.host + '/v1/' + ep
     
-    def auth_code_grant_flow(self, user_info, client_info, scope = 'spark:people_read spark:rooms_read spark:memberships_read spark:messages_read spark:people_write spark:rooms_write spark:memberships_write spark:messages_write spark:teams_read spark:teams_write spark:team_memberships_read spark:team_memberships_write'):
+    def auth_code_grant_flow(self, user_info, client_info, scope = 'spark:people_read spark:rooms_read spark:memberships_read spark:messages_read spark:rooms_write spark:memberships_write spark:messages_write spark:teams_read spark:teams_write spark:team_memberships_read spark:team_memberships_write'):
         ''' scope is a space separated list of requested scopes:
-            spark:people_read          Read your company directory
-            spark:rooms_read           List the titles of rooms that you're in
-            spark:rooms_write          Manage rooms on your behalf
-            spark:memberships_read     List the people in rooms that you're in
-            spark:memberships_write    Invite people to rooms on your behalf
-            spark:messages_read        Read the content of rooms that you're in
-            spark:messages_write       Post and delete messages on your behalf
-        '''
+            spark:people_read Read your users’ company directory
+            spark:rooms_read List the titles of rooms that your user’s are in
+            spark:rooms_write Manage rooms on your users’ behalf
+            spark:memberships_read List people in the rooms your user’s are in
+            spark:memberships_write Invite people to rooms on your users’ behalf
+            spark:messages_read Read the content of rooms that your user’s are in
+            spark:messages_write Post and delete messages on your users’ behalf
+            spark:teams_read List the teams your users are in
+            spark:teams_write Create teams on your users’ behalf
+            spark:team_memberships_read List the people in the teams your user’s belong to
+            spark:team_memberships_write Add people to teams on your users’ behalf
+            '''
         return CiscoIdentityBroker.auth_code_grant_flow(self, user_info, client_info, scope)
     
 class AuthToken(Struct):
