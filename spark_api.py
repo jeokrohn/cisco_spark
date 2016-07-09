@@ -391,9 +391,8 @@ class SparkAPI:
     @_api_call
     @dumpArgs
     def delete_team(self, team_id):
-        params = {k[2:]:v for k,v in locals().items() if k[:2] == 'p_' and v != None}
         endpoint = self.endpoint('teams', team_id)
-        return self.delete(endpoint, json=params)
+        return self.delete(endpoint)
     
     ############################# team memberships
     
