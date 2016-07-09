@@ -138,7 +138,7 @@ def create_teams():
     ''' the actual magic
     read user data from the CSV and create the teams
     '''
-    # read lsit of users from CSV
+    # read list of users from CSV
     users = read_csv()
     
     # some Python magic to get a list of unique department names
@@ -172,11 +172,16 @@ def cleanup_teams():
     # get a Spark API instance
     spark = setup_spark()
     
+    users = read_csv()
+    
+    # some Python magic to get a list of team room names for the departments in the CSV
+    team_names = [department_to_team_room(department) for department in set((user['Department'] for user in users))]
+    
     # get an iterator with all teams
     teams = spark.list_teams()
     
-    # we only want the teams with names starting with the prefix we use to create teams
-    teams = [team for team in teams if team['name'].startswith(department_to_team_room(''))]
+    # we only want the teams matching the department names from the CSV
+    teams = [team for team in teams if team['name'] in team_names]
     
     # also to be on the safe side we only delete teams created today
     today = spark_api.time_to_str(datetime.datetime.utcnow())[:11]
