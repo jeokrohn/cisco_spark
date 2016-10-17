@@ -370,7 +370,10 @@ class SparkDevIdentityBroker(CiscoIdentityBroker):
             spark:team_memberships_write Add people to teams on your users’ behalf
             '''
         return CiscoIdentityBroker.auth_code_grant_flow(self, user_info, client_info, scope)
-    
+ 
+class SparkCCMIndentityBroker(CiscoIdentityBroker):
+    pass
+
 class AuthToken(Struct):
     def __init__(self, token, expires_in, token_type, expires_at = None):
         Struct.__init__(self, {k:v for k,v in locals().items() if k != 'self'})

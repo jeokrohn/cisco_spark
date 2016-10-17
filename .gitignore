@@ -2,3 +2,23 @@ spark_test.ini
 __pycache__/
 *.log
 /spark.ini
+/spark_async.py
+/spark_errors.py
+/p3ff.py
+/p3ff-1.py
+/Encrypted Communication with KMS.docx
+/get_attachments.ini
+/spark_async_api.py
+/list_messages.py
+/reset_last_activity.py
+/spark_test.py
+/spark.ini.cisco
+/spark.ini.krohns
+/spark.ini.sik_old_client
+/template.diagramtemplate
+/test_cases.py
+/test_webhooks.py
+/understanding_spark.py
+/create_teams_async.py
+/watercooler.py
+/async_iterator.py

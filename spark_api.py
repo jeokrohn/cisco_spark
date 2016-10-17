@@ -81,7 +81,8 @@ def _api_call(f):
             if r.text:
                 r = r.json()
                 # if result has 'items' then just return that
-                r = r.get('items', r)
+                if isinstance(r, dict):
+                    r = r.get('items', r)
             else:
                 r = ''
             return r
@@ -134,7 +135,7 @@ def _method(f):
     '''
     
     @wraps(f)
-    def wrapper(self, endpoint, auto_retry429 = True, **kwargs):
+    def wrapper(self, endpoint, auto_retry = False, **kwargs):
         self.add_auth_to_headers(kwargs)
         back_off = 1
         retries = 0
@@ -151,22 +152,29 @@ def _method(f):
             retries = 0
                 
             dump_response(response)
-            if (response.status_code in [429, 500, 502]) and auto_retry429 and back_off < 100:
+            if response.status_code == 429:
+                try:
+                    retry_after = min(int(response.headers['retry-after']), 1)
+                except Exception:
+                    retry_after = 1
+                log.warning ('429 encountered. Retry after {} seconds'.format(retry_after))
+                time.sleep(retry_after)
+                continue
+            
+            if (response.status_code in [500, 502]) and auto_retry and back_off < 600:
                 message = {}
-                if response.status_code in [500, 502]:
-                    # if we get a 500 b/c a message can  not be decrypted then a retry will not help
-                    try:
-                        message = response.json()
-                    except JSONDecodeError:
-                        message = {}
-                    if message.get('message', '') in ['Unable to parse encrypted message', 
-                                                      'Unable to decrypt content name.',
-                                                      'Unable to decrypt message',
-                                                      'DefaultActivityEncryptionKeyUrl not found.']: 
-                        # retry does not help
-                        break
-                    # if message.get..
-                # if response.status_code == 500
+                # if we get a 500 b/c a message can not be decrypted then a retry will not help
+                try:
+                    message = response.json()
+                except JSONDecodeError:
+                    message = {}
+                if message.get('message', '') in ['Unable to parse encrypted message', 
+                                                  'Unable to decrypt content name.',
+                                                  'Unable to decrypt message',
+                                                  'DefaultActivityEncryptionKeyUrl not found.']: 
+                    # retry does not help
+                    break
+                # if message.get..
                 log.warning('\'{}\' encountered. Message {}. Retry, waiting for {} second(s)'.format(response.reason, message, back_off))
                 time.sleep(back_off)
                 back_off = back_off * 2
